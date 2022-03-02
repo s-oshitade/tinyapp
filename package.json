@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/s-oshitade/tinyapp/issues"
   },
-  "homepage": "https://github.com/s-oshitade/tinyapp#readme"
+  "homepage": "https://github.com/s-oshitade/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.3"
+  }
 }
