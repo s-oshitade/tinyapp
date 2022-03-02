@@ -16,6 +16,12 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+//routes for url submission form
+app.route("/urls/new")
+  .get((req, res) => {
+    res.render("urls_new");
+  })
+
 //route handler to display single URL and its shortened form
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[this.shortURL] };
