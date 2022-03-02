@@ -1,3 +1,4 @@
+const { generateRandomString } = require('./generate-random-string');
 const express = require("express");
 const app = express();
 const PORT = 8080; // 
@@ -21,10 +22,15 @@ app.get("/urls", (req, res) => {
 });
 
 //routes for url submission form
-app.route("/urls/new")
-  .get((req, res) => {
-    res.render("urls_new");
-  })
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
+app.post("/urls", (req, res) => {
+  console.log(req.body);  
+  res.send("Ok");         
+});
+
 
 //route handler to display single URL and its shortened form
 app.get("/urls/:shortURL", (req, res) => {
