@@ -1,0 +1,19 @@
+{
+  "name": "tinyapp",
+  "version": "1.0.0",
+  "description": "A full stack web app built with Node and Express that allows users to shorten long URLs (à la bit.ly).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/s-oshitade/tinyapp.git"
+  },
+  "author": "Seun Oshitade",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/s-oshitade/tinyapp/issues"
+  },
+  "homepage": "https://github.com/s-oshitade/tinyapp#readme"
+}
