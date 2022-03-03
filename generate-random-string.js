@@ -16,4 +16,4 @@ const generateRandomString = (URL_LENGTH) => {
   return result;
 };
 
-module.exports = { generateRandomString };
+module.exports = { generateRandomString, URL_LENGTH };
