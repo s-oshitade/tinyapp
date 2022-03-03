@@ -1,8 +1,8 @@
-const { generateRandomString } = require('./generate-random-string');
+const { generateRandomString, URL_LENGTH } = require('./generate-random-string');
 const express = require("express");
 const app = express();
 const PORT = 8080; // 
-
+console.log("URL LENGTH", URL_LENGTH)
 //incorporate body parser to handle inbound data from post route
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
@@ -25,17 +25,25 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
-
 app.post("/urls", (req, res) => {
-  console.log(req.body);  
-  res.send("Ok");         
+  const shortURL = generateRandomString(URL_LENGTH);
+  const longURL = req.body.longURL;
+  urlDatabase[shortURL] = longURL;
+  console.log("URL Database", urlDatabase);
+  res.redirect(`/urls/${shortURL}`);         
 });
 
-
-//route handler to display single URL and its shortened form
+//route handler to show single URL and its shortened form
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[this.shortURL] };
   res.render("urls_show", templateVars);
+});
+
+//route to handle short URL requests
+app.get("/u/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL];
+  res.redirect(longURL);
 });
 
 app.listen(PORT, () => {
