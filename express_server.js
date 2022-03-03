@@ -34,7 +34,11 @@ app.post("/urls", (req, res) => {
 
 //route handler to show single URL and its shortened form
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[this.shortURL] };
+  const shortURL = req.params.shortURL;
+  const templateVars = { 
+    shortURL, 
+    longURL: urlDatabase[shortURL] 
+  };
   res.render("urls_show", templateVars);
 });
 
@@ -44,6 +48,15 @@ app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[shortURL];
   res.redirect(longURL);
 });
+
+//route handler for updating URLs
+app.post("/urls/:id", (req, res) => {
+  const shortURL = req.params.id;
+  const longURL = req.body.edit;
+  urlDatabase[shortURL] = longURL;
+  res.redirect("/urls");
+});
+
 
 //route handler for deleting URLs
 app.post("/urls/:shortURL/delete", (req, res) => {
