@@ -1,8 +1,8 @@
 const { generateRandomString, URL_LENGTH } = require('./generate-random-string');
 const express = require("express");
 const app = express();
-const PORT = 8080; // 
-console.log("URL LENGTH", URL_LENGTH)
+const PORT = 8080; //
+
 //incorporate body parser to handle inbound data from post route
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
@@ -29,8 +29,7 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(URL_LENGTH);
   const longURL = req.body.longURL;
   urlDatabase[shortURL] = longURL;
-  console.log("URL Database", urlDatabase);
-  res.redirect(`/urls/${shortURL}`);         
+  res.redirect(`/urls/${shortURL}`);
 });
 
 //route handler to show single URL and its shortened form
@@ -44,6 +43,13 @@ app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL];
   res.redirect(longURL);
+});
+
+//route handler for deleting URLs
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
 });
 
 app.listen(PORT, () => {
