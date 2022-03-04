@@ -22,6 +22,14 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+//route handler for login
+app.post("/login", (req, res) => {
+  const username = req.body.username;
+  res.cookie('username', `${username}`); //set cookie to the value submitted via login form
+  console.log(req.cookies.username);
+  res.redirect('/urls');
+})
+
 //routes for url submission form
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
