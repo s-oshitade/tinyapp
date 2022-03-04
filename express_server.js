@@ -18,7 +18,10 @@ const urlDatabase = {
 
 //route handler for urls
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { 
+    urls: urlDatabase,
+    username: req.cookies["username"] 
+  };
   res.render("urls_index", templateVars);
 });
 
@@ -26,13 +29,24 @@ app.get("/urls", (req, res) => {
 app.post("/login", (req, res) => {
   const username = req.body.username;
   res.cookie('username', `${username}`); //set cookie to the value submitted via login form
-  console.log(req.cookies.username);
   res.redirect('/urls');
 })
 
+//route handler for logout
+app.post("/logout", (req, res) => {
+  const cookieObj = req.cookies;
+  const cookieName = Object.keys(cookieObj).toString();
+  res.clearCookie(cookieName);
+  res.redirect("/urls");
+})
+
+
 //routes for url submission form
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = { 
+    username: req.cookies["username"]  
+  };
+  res.render("urls_new", templateVars);
 });
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(URL_LENGTH);
@@ -46,7 +60,8 @@ app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const templateVars = { 
     shortURL, 
-    longURL: urlDatabase[shortURL] 
+    longURL: urlDatabase[shortURL],
+    username: req.cookies["username"]  
   };
   res.render("urls_show", templateVars);
 });
