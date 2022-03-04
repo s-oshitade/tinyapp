@@ -1,11 +1,12 @@
 const { generateRandomString, URL_LENGTH } = require('./generate-random-string');
 const express = require("express");
+const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; //
 
-//incorporate body parser to handle inbound data from post route
-const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 
 //set ejs as the view engine
 app.set("view engine", "ejs");
@@ -56,7 +57,6 @@ app.post("/urls/:id", (req, res) => {
   urlDatabase[shortURL] = longURL;
   res.redirect("/urls");
 });
-
 
 //route handler for deleting URLs
 app.post("/urls/:shortURL/delete", (req, res) => {
