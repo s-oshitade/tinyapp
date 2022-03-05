@@ -37,9 +37,9 @@ app.post("/logout", (req, res) => {
   const cookieObj = req.cookies;
   const cookieName = Object.keys(cookieObj).toString();
   res.clearCookie(cookieName);
+  res.clearCookie();
   res.redirect("/urls");
 })
-
 
 //routes for url submission form
 app.get("/urls/new", (req, res) => {

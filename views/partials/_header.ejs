@@ -12,9 +12,10 @@
     </div>
     <% if(username){ %>
       <form action="/logout" method="POST" class="row">
-        <!-- @TODO: cleanup inline styles! -->
+        <!-- @TODO: cleanup inline styles! Move them to public folder -->
         <div style="vertical-align: middle"> 
           <h6 style="display: inline">Logged in as: <%= username %>!</h6>
+          <input type="hidden" name="username">
           <button style="margin: 0.3rem" type="submit" class="btn btn-outline-dark btn-sm">Logout</button>
         </div>
       </form>
