@@ -37,7 +37,6 @@ app.post("/logout", (req, res) => {
   const cookieObj = req.cookies;
   const cookieName = Object.keys(cookieObj).toString();
   res.clearCookie(cookieName);
-  res.clearCookie();
   res.redirect("/urls");
 })
 
