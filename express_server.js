@@ -30,21 +30,13 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-//route handler for urls
-app.get("/urls", (req, res) => {
-  const templateVars = { 
-    urls: urlDatabase,
-    username: req.cookies["username"] 
-  };
-  res.render("urls_index", templateVars);
-});
-
 //route handler for GET/register
 app.get("/register", (req, res) => {
+  const user_id = req.cookies["user_id"];
+  const user = users[user_id];
   const templateVars = { 
-    username: req.cookies["username"]  
+    user: user
   };
-  console.log(res);
   res.render("urls_register", templateVars);
 })
 
@@ -55,10 +47,21 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
   res.cookie('user_id', user)
   users[user] = { id: user, email, password }  
-  console.log(users);
+  console.log("users: ", users)
   res.redirect('/urls');
 })
 
+//route handler for urls
+app.get("/urls", (req, res) => {
+  const user_id = req.cookies["user_id"];
+  const user = users[user_id];
+  const templateVars = { 
+    urls: urlDatabase,
+    user: user
+    // username: req.cookies["username"] 
+  };
+  res.render("urls_index", templateVars);
+});
 
 //route handler for login
 app.post("/login", (req, res) => {
@@ -71,14 +74,16 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   // const cookieObj = req.cookies;
   // const cookieName = Object.keys(cookieObj).toString(); @TODO: FIND OUT WHY THE COOKIENAME DOES NOT WORK WITH cURL command.
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 })
 
 //routes for url submission form
 app.get("/urls/new", (req, res) => {
+  const user_id = req.cookies["user_id"];
+  const user = users[user_id];
   const templateVars = { 
-    username: req.cookies["username"]  
+    user: user
   };
   res.render("urls_new", templateVars);
 });
@@ -91,11 +96,13 @@ app.post("/urls", (req, res) => {
 
 //route handler to show single URL and its shortened form
 app.get("/urls/:shortURL", (req, res) => {
+  const user_id = req.cookies["user_id"];
+  const user = users[user_id];
   const shortURL = req.params.shortURL;
   const templateVars = { 
     shortURL, 
     longURL: urlDatabase[shortURL],
-    username: req.cookies["username"]  
+    user: user
   };
   res.render("urls_show", templateVars);
 });
@@ -125,3 +132,5 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+//Driver code
