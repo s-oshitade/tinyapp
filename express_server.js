@@ -7,6 +7,7 @@ const PORT = 8080; //
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+app.use(express.static("public"));
 
 //set ejs as the view engine
 app.set("view engine", "ejs");
@@ -24,6 +25,15 @@ app.get("/urls", (req, res) => {
   };
   res.render("urls_index", templateVars);
 });
+
+//route handler for GET/register
+app.get("/register", (req, res) => {
+  const templateVars = { 
+    username: req.cookies["username"]  
+  };
+  console.log(res);
+  res.render("urls_register", templateVars);
+})
 
 //route handler for login
 app.post("/login", (req, res) => {
