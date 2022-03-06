@@ -10,22 +10,23 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-    <% if(username){ %>
+    
+
+    <% if(user){ %>
       <form action="/logout" method="POST" class="row">
-        <!-- @TODO: cleanup inline styles! Move them to public folder -->
-        <div style="vertical-align: middle"> 
-          <h6 style="display: inline">Logged in as: <%= username %>!</h6>
-          <input type="hidden" name="username">
-          <button style="margin: 0.3rem" type="submit" class="btn btn-outline-dark btn-sm">Logout</button>
-        </div>
-      </form>
-    <% } else { %>
-      <form action="/login" method="POST" class="row">
-        <div style="vertical-align: middle"> 
-          <input type="text" name="username" placeholder="Username">
-          <button style="margin: 0.3rem" type="submit" class="btn btn-outline-dark btn-sm">Login</button>
-        </div>
-      </form>
-   <% } %>
+      <div style="vertical-align: middle"> 
+        <h6 style="display: inline">Logged in as: <%= user.email %></h6>
+        <input type="hidden" name="username">
+        <button style="margin: 0.3rem" type="hidden" class="btn btn-outline-dark btn-sm">Logout</button>
+      </div>
+    </form>
+  <% } else { %>
+    <form action="/login" method="POST" class="row">
+      <div style="vertical-align: middle"> 
+        <input type="text" name="username" placeholder="Username">
+        <button style="margin: 0.3rem" type="submit" class="btn btn-outline-dark btn-sm">Login</button>
+      </div>
+    </form>
+  <% } %>
   </nav>
 </header>
