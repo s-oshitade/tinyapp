@@ -12,6 +12,19 @@ app.use(express.static("public"));
 //set ejs as the view engine
 app.set("view engine", "ejs");
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -34,6 +47,17 @@ app.get("/register", (req, res) => {
   console.log(res);
   res.render("urls_register", templateVars);
 })
+
+//route handler for POST/register
+app.post("/register", (req, res) => {
+  const user = generateRandomString(URL_LENGTH);
+  const email = req.body.email;
+  const password = req.body.password;
+  users[user] = { id: user, email, password }  
+  console.log(users);
+  res.redirect('/urls');
+})
+
 
 //route handler for login
 app.post("/login", (req, res) => {
