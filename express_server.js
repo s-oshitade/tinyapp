@@ -53,6 +53,7 @@ app.post("/register", (req, res) => {
   const user = generateRandomString(URL_LENGTH);
   const email = req.body.email;
   const password = req.body.password;
+  res.cookie('user_id', user)
   users[user] = { id: user, email, password }  
   console.log(users);
   res.redirect('/urls');
