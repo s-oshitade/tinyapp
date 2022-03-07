@@ -80,7 +80,15 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//helper function for checking user credentials
+//helper functions for checking user credentials
+function lookupUserByEmail(users, email) {
+  for (const key in users) {
+    if (users[key].email === email) {
+      return key;
+    }
+  }
+  return false;
+}
 const checkUserID = (users, email, password) => {
   for (const key in users) {
     if (users[key].email === email && users[key].password === password) {
@@ -108,9 +116,16 @@ app.post("/login", (req, res) => {
   if(!email || !password){ //check that email or password are not blank
     res.status(400).send("Please check the email or password! They cannot be empty.")
   } 
+  let user = lookupUserByEmail(users, email);
+  if(!user){
+    res.response(403).send(`user with email: ${email} was not found!`);
+  }
+  if(user.password !== password){
+    res.response(403).send(`Incorrect password! Please try again`);
+  }
   const isValidUser = checkUserID(users, email, password)
   if(isValidUser){
-    const user = isValidUser;
+    user = isValidUser;
     users[user] = { id: user, email, password }; 
     res.cookie('user_id', user);
     console.log("users: ", users);
@@ -121,8 +136,6 @@ app.post("/login", (req, res) => {
 
 //route handler for logout
 app.post("/logout", (req, res) => {
-  // const cookieObj = req.cookies;
-  // const cookieName = Object.keys(cookieObj).toString(); @TODO: FIND OUT WHY THE COOKIENAME DOES NOT WORK WITH cURL command.
   res.clearCookie("user_id");
   res.redirect("/login");
 })
