@@ -40,15 +40,36 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars);
 })
 
+//helper function for checking duplicate email
+function checkDuplicateEmail(email) {
+  for(let key in users){
+    if(users[key].email === email){
+      return true;
+    }
+  }
+  return false;
+}
 //route handler for POST/register
-app.post("/register", (req, res) => {
-  const user = generateRandomString(URL_LENGTH);
+app.post("/register", (req, res) => { 
   const email = req.body.email;
   const password = req.body.password;
-  res.cookie('user_id', user)
-  users[user] = { id: user, email, password }  
-  console.log("users: ", users)
-  res.redirect('/urls');
+  
+  //1. Condition to check is that the email and password should not be blnak
+  if(!email || !password){
+    res.send("Please check the email or password! They cannot be empty")
+  } else { //(2. Check whether the email is already registered or not)
+    let result = checkDuplicateEmail(email);
+    if(result){ //email was already taken
+        res.send("This email has already been taken");
+    } else {
+        //it means everything is fine, and user the can be registered
+        const user = generateRandomString(URL_LENGTH);
+        users[user] = { id: user, email, password }  
+        res.cookie('user_id', user)
+        console.log("users: ", users)
+        res.redirect('/urls');
+    }
+  }  
 })
 
 //route handler for urls
@@ -132,5 +153,3 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-//Driver code
