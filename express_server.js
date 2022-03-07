@@ -80,7 +80,15 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//route handler for login
+//route handlers for login
+app.get("/login", (req, res) => {
+  const user_id = req.cookies["user_id"];
+  const user = users[user_id];
+  const templateVars = { 
+    user: user
+  };
+  res.render("urls_login", templateVars);
+})
 app.post("/login", (req, res) => {
   const username = req.body.username;
   res.cookie('username', `${username}`); //set cookie to the value submitted via login form
