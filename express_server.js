@@ -55,7 +55,7 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   if(!email || !password){ //check that email or password are not blank
-    res.status(400).send("Please check the email or password! They cannot be empty.")
+    res.status(400).send("Please check the email or password! They cannot be empty.");
   } 
   let result = checkDuplicateEmail(email);
   if(result){ //email was already taken
@@ -64,8 +64,8 @@ app.post("/register", (req, res) => {
   //if the code is still running at this point, then the user can be registered.
   const user = generateRandomString(URL_LENGTH);
   users[user] = { id: user, email, password }  
-  res.cookie('user_id', user)
-  console.log("users: ", users)
+  res.cookie('user_id', user);
+  console.log("users: ", users); //TODO: Delete 
   res.redirect('/urls');
 })
 
@@ -115,23 +115,25 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
   if(!email || !password){ //check that email or password are not blank
     res.status(400).send("Please check the email or password! They cannot be empty.")
+    return;
   } 
-  let user = lookupUserByEmail(users, email);
-  if(!user){
-    res.response(403).send(`user with email: ${email} was not found!`);
+  let user_key = lookupUserByEmail(users, email);
+  if(!user_key){
+    res.status(403).send(`user with email: ${email} was not found!`);
+    return;
   }
-  if(user.password !== password){
-    res.response(403).send(`Incorrect password! Please try again`);
+  if(users[user_key].password !== password){
+    res.status(403).send(`Incorrect password! Please try again`);
+    return;
   }
   const isValidUser = checkUserID(users, email, password)
   if(isValidUser){
     user = isValidUser;
     users[user] = { id: user, email, password }; 
     res.cookie('user_id', user);
-    console.log("users: ", users);
     res.redirect('/urls');
   }
-  res.status(400).send("Please login with valid email and password!")
+  return res.status(400).send("Please login with valid email and password!")
 })
 
 //route handler for logout
