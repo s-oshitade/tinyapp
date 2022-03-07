@@ -80,12 +80,22 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+//helper function for checking if user is logged in
+function loginStatus(params) {
+  if(true){
+    return true;
+  } else {
+    return false;
+  }
+}
 //route handlers for login
 app.get("/login", (req, res) => {
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
+  const isLoggedIn = loginStatus();
   const templateVars = { 
-    user: user
+    user: user,
+    isLoggedIn: isLoggedIn
   };
   res.render("urls_login", templateVars);
 })

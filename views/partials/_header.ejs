@@ -4,14 +4,35 @@
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-item nav-link" href="/urls">My URLs</a>
-        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+    <!-- <% if(!user){ %>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+          <a class="nav-item nav-link" href="/register">Register |</a>
+          <a class="nav-item nav-link" href="/login">Already registered? Login here |</a>
+          <a class="nav-item nav-link" href="/urls">  My URLs  |</a>
+          <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        </div>
       </div>
-    </div>
-    
 
+    <% } else { %>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+          <a class="nav-item nav-link" href="/urls">  My URLs  |</a>
+          <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        </div>
+      </div>
+
+      <form action="/logout" method="POST" class="row">
+        <div style="vertical-align: middle"> 
+          <h6 style="display: inline">Logged in as: <%= user.email %></h6>
+          <input type="hidden" name="username">
+          <button style="margin: 0.3rem" type="hidden" class="btn btn-outline-dark btn-sm">Logout</button>
+        </div>
+      </form>
+
+    <% } %> -->
+    
+    
     <% if(user){ %>
       <form action="/logout" method="POST" class="row">
       <div style="vertical-align: middle"> 
@@ -21,12 +42,14 @@
       </div>
     </form>
   <% } else { %>
-    <form action="/login" method="POST" class="row">
-      <div style="vertical-align: middle"> 
-        <input type="text" name="username" placeholder="Username">
-        <button style="margin: 0.3rem" type="submit" class="btn btn-outline-dark btn-sm">Login</button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link" href="/register">Register |</a>
+        <a class="nav-item nav-link" href="/login">Already registered? Login here |</a>
+        <a class="nav-item nav-link" href="/urls">  My URLs  |</a>
+        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
-    </form>
+    </div>
   <% } %>
   </nav>
 </header>
