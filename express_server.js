@@ -110,6 +110,10 @@ app.post("/login", (req, res) => {
   } 
   const isValidUser = checkUserID(users, email, password)
   if(isValidUser){
+    const user = isValidUser;
+    users[user] = { id: user, email, password }; 
+    res.cookie('user_id', user);
+    console.log("users: ", users);
     res.redirect('/urls');
   }
   res.status(400).send("Please login with valid email and password!")
