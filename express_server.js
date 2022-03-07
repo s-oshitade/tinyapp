@@ -80,29 +80,39 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//helper function for checking if user is logged in
-function loginStatus(params) {
-  if(true){
-    return true;
-  } else {
-    return false;
+//helper function for checking user credentials
+const checkUserID = (users, email, password) => {
+  for (const key in users) {
+    if (users[key].email === email && users[key].password === password) {
+      return key;
+    }
   }
-}
+  return false;
+};
 //route handlers for login
 app.get("/login", (req, res) => {
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
-  const isLoggedIn = loginStatus();
+  const email = req.body.email;
+  const password = req.body.password;
+  const isValidUser = checkUserID(users, email, password)
   const templateVars = { 
     user: user,
-    isLoggedIn: isLoggedIn
+    isValidUser: isValidUser
   };
   res.render("urls_login", templateVars);
 })
 app.post("/login", (req, res) => {
-  const username = req.body.username;
-  res.cookie('username', `${username}`); //set cookie to the value submitted via login form
-  res.redirect('/urls');
+  const email = req.body.email;
+  const password = req.body.password;
+  if(!email || !password){ //check that email or password are not blank
+    res.status(400).send("Please check the email or password! They cannot be empty.")
+  } 
+  const isValidUser = checkUserID(users, email, password)
+  if(isValidUser){
+    res.redirect('/urls');
+  }
+  res.status(400).send("Please login with valid email and password!")
 })
 
 //route handler for logout
