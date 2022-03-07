@@ -110,7 +110,7 @@ app.post("/logout", (req, res) => {
   // const cookieObj = req.cookies;
   // const cookieName = Object.keys(cookieObj).toString(); @TODO: FIND OUT WHY THE COOKIENAME DOES NOT WORK WITH cURL command.
   res.clearCookie("user_id");
-  res.redirect("/urls");
+  res.redirect("/login");
 })
 
 //routes for url submission form
