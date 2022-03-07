@@ -49,27 +49,24 @@ function checkDuplicateEmail(email) {
   }
   return false;
 }
+
 //route handler for POST/register
 app.post("/register", (req, res) => { 
   const email = req.body.email;
   const password = req.body.password;
-  
-  //1. Condition to check is that the email and password should not be blnak
-  if(!email || !password){
-    res.send("Please check the email or password! They cannot be empty")
-  } else { //(2. Check whether the email is already registered or not)
-    let result = checkDuplicateEmail(email);
-    if(result){ //email was already taken
-        res.send("This email has already been taken");
-    } else {
-        //it means everything is fine, and user the can be registered
-        const user = generateRandomString(URL_LENGTH);
-        users[user] = { id: user, email, password }  
-        res.cookie('user_id', user)
-        console.log("users: ", users)
-        res.redirect('/urls');
-    }
-  }  
+  if(!email || !password){ //check that email or password are not blank
+    res.status(400).send("Please check the email or password! They cannot be empty.")
+  } 
+  let result = checkDuplicateEmail(email);
+  if(result){ //email was already taken
+      res.status(400).send("This email has already been taken!");
+  } 
+  //if the code is still running at this point, then the user can be registered.
+  const user = generateRandomString(URL_LENGTH);
+  users[user] = { id: user, email, password }  
+  res.cookie('user_id', user)
+  console.log("users: ", users)
+  res.redirect('/urls');
 })
 
 //route handler for urls
@@ -79,7 +76,6 @@ app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
     user: user
-    // username: req.cookies["username"] 
   };
   res.render("urls_index", templateVars);
 });
