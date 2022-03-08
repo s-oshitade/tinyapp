@@ -59,6 +59,7 @@ const urlDatabase = {
       }
       return false;
     };
+  
 
 //route handler for GET/register
 app.get("/register", (req, res) => {
@@ -85,20 +86,9 @@ app.post("/register", (req, res) => {
   const user = generateRandomString(URL_LENGTH);
   users[user] = { id: user, email, password }  
   res.cookie('user_id', user);
-  console.log("users: ", users); //TODO: Delete 
+  console.log(`logged in as ${email}!`)
   res.redirect('/urls');
 })
-
-//route handler for urls
-app.get("/urls", (req, res) => {
-  const user_id = req.cookies["user_id"];
-  const user = users[user_id];
-  const templateVars = { 
-    urls: urlDatabase,
-    user: user
-  };
-  res.render("urls_index", templateVars);
-});
 
 //route handlers for login
 app.get("/login", (req, res) => {
@@ -106,7 +96,7 @@ app.get("/login", (req, res) => {
   const user = users[user_id];
   const email = req.body.email;
   const password = req.body.password;
-  const isValidUser = checkUserID(users, email, password)
+  const isValidUser = checkUserID(users, email, password);
   const templateVars = { 
     user: user,
     isValidUser: isValidUser
@@ -122,11 +112,11 @@ app.post("/login", (req, res) => {
   } 
   let user_key = lookupUserByEmail(users, email);
   if(!user_key){
-    res.status(403).send(`user with email: ${email} was not found!`);
+    res.status(403).send(`User with email: ${email} was not found! Please register and try again.`);
     return;
   }
   if(users[user_key].password !== password){
-    res.status(403).send(`Incorrect password! Please try again`);
+    res.status(403).send(`Incorrect credentials! Please try again.`);
     return;
   }
   const isValidUser = checkUserID(users, email, password)
@@ -134,7 +124,7 @@ app.post("/login", (req, res) => {
     user = isValidUser;
     users[user] = { id: user, email, password }; 
     res.cookie('user_id', user);
-    res.redirect('/urls');
+    return res.redirect('/urls');
   }
   return res.status(400).send("Please login with valid email and password!")
 })
@@ -145,12 +135,38 @@ app.post("/logout", (req, res) => {
   res.redirect("/login");
 })
 
+//route handler for urls
+app.get("/urls", (req, res) => {
+  const user_id = req.cookies["user_id"];
+  if(!user_id){
+    console.log("Please login to access the requested page!")
+    return res.redirect("/login");
+  }
+  const user = users[user_id];
+  const email = user.email;
+  const password = user.password;
+  const isLoggedIn = checkUserID(users, email, password)
+  const templateVars = { 
+    urls: urlDatabase,
+    user: user
+  };
+  if(!isLoggedIn){
+    console.log("Please login to access the requested page!")
+    return res.redirect("/login");
+  }
+  res.render("urls_index", templateVars);
+});
+
 //routes for url submission form
 app.get("/urls/new", (req, res) => {
   const user_id = req.cookies["user_id"];
+  if(!user_id){
+    console.log("Please login to access the requested page!")
+    return res.redirect("/login");
+  }
   const user = users[user_id];
-  const email = req.body.email;
-  const password = req.body.password;
+  const email = user.email;
+  const password = user.password;
   const isLoggedIn = checkUserID(users, email, password)
   const templateVars = { 
     user: user,
@@ -163,6 +179,14 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 app.post("/urls", (req, res) => {
+  const user_id = req.cookies["user_id"];
+  const user = users[user_id];
+  const email = user.email;
+  const password = user.password;
+  const isLoggedIn = checkUserID(users, email, password)
+  if(!isLoggedIn){
+    return res.status(401).send("Unauthorized request. Please login to access requested page.")
+  }
   const shortURL = generateRandomString(URL_LENGTH);
   const longURL = req.body.longURL;
   urlDatabase[shortURL] = longURL;
