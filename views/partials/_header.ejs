@@ -8,7 +8,7 @@
       <form action="/logout" method="POST" class="row">
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav" style="vertical-align:middle"> 
-          <a class="nav-item nav-link" href="/urls">  My URLs  |</a>
+          <a class="nav-item nav-link" href="/urls">  My URLs  </a>
           <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
           <a class="nav-item nav-link" style="color: blue;">Logged in as: <%= user.email %></a>
           <input type="hidden" name="user_id">
@@ -18,10 +18,10 @@
   <% } else { %>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-        <a class="nav-item nav-link" href="/urls">  My URLs  |</a>
+        <a class="nav-item nav-link" href="/urls">  My URLs  </a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <a class="nav-item nav-link" href="/register">Register |</a>
-        <a class="nav-item nav-link" href="/login">Login |</a>
+        <a class="nav-item nav-link" href="/register">Register</a>
+        <a class="nav-item nav-link" href="/login">Login</a>
       </div>
     </div>
   <% } %>
