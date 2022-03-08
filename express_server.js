@@ -3,7 +3,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const app = express();
-const PORT = 8080; //
+const PORT = 8080; 
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
@@ -149,9 +149,17 @@ app.post("/logout", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
+  const email = req.body.email;
+  const password = req.body.password;
+  const isLoggedIn = checkUserID(users, email, password)
   const templateVars = { 
-    user: user
+    user: user,
+    isLoggedIn: isLoggedIn
   };
+  if(!isLoggedIn){
+    console.log("Please login to access the requested page!")
+    return res.redirect("/login");
+  }
   res.render("urls_new", templateVars);
 });
 app.post("/urls", (req, res) => {
