@@ -32,8 +32,8 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-//all helper functions
-//1. helper function for checking duplicate email
+//All helper functions
+//1. Celper function for checking duplicate email
 function checkDuplicateEmail(email) {
   for (let key in users) {
     if (users[key].email === email) {
@@ -70,6 +70,7 @@ app.get("/register", (req, res) => {
   const templateVars = {
     user: user
   };
+  console.log(user);
   res.render("urls_register", templateVars);
 });
 
@@ -78,11 +79,11 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   if (!email || !password) { //check that email or password are not blank
-    res.status(400).send("Please check the email or password! They cannot be empty.");
+    return res.status(400).send("Please check the email or password! They cannot be empty.");
   }
   let result = checkDuplicateEmail(email);
   if (result) { //email was already taken
-    res.status(400).send("This email has already been taken!");
+    return res.status(400).send("This email has already been taken!");
   }
   //if the code is still running at this point, then the user can be registered.
   const user = generateRandomString(URL_LENGTH);
@@ -96,12 +97,12 @@ app.post("/register", (req, res) => {
 app.get("/login", (req, res) => {
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
-  const email = req.body.email;
-  const password = req.body.password;
-  const isValidUser = checkUserID(users, email, password);
+  // const email = req.body.email;
+  // const password = req.body.password;
+  // const isValidUser = checkUserID(users, email, password);
   const templateVars = {
     user: user,
-    isValidUser: isValidUser
+    // isValidUser: isValidUser
   };
   res.render("urls_login", templateVars);
 });
@@ -109,17 +110,14 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   if (!email || !password) { //check that email or password are not blank
-    res.status(400).send("Please check the email or password! They cannot be empty.");
-    return;
+    return res.status(400).send("Please check the email or password! They cannot be empty.");
   }
   let user_key = lookupUserByEmail(users, email);
   if (!user_key) {
-    res.status(403).send(`User with email: ${email} was not found! Please register and try again.`);
-    return;
+    return res.status(403).send(`User with email: ${email} was not found! Please register and try again.`);
   }
   if (users[user_key].password !== password) {
-    res.status(403).send(`Incorrect credentials! Please try again.`);
-    return;
+    return res.status(403).send(`Incorrect credentials! Please try again.`);
   }
   const isValidUser = checkUserID(users, email, password);
   if (isValidUser) {
@@ -159,14 +157,14 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//routes for url submission form
+//Routes for url submission form
 app.get("/urls/new", (req, res) => {
   const user_id = req.cookies["user_id"];
   if (!user_id) {
     console.log("Please login to access the requested page!");
     return res.redirect("/login");
   }
-  const user = users[user_id];
+  const user = users[user_id]; //Use info from cookie to access user object
   const email = user.email;
   const password = user.password;
   const isLoggedIn = checkUserID(users, email, password);
@@ -195,7 +193,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-//route handler to show single URL and its shortened form
+//Route handler to show single URL and its shortened form
 app.get("/urls/:shortURL", (req, res) => {
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
