@@ -1,10 +1,12 @@
 const { generateRandomString, URL_LENGTH } = require('./generate-random-string');
 const express = require("express");
+const morgan = require('morgan');
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const app = express();
-const PORT = 8080; 
+const PORT = 8080;
 
+app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.use(express.static("public"));
@@ -12,18 +14,18 @@ app.use(express.static("public"));
 //set ejs as the view engine
 app.set("view engine", "ejs");
 
-const users = { 
+const users = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
-}
+};
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -31,64 +33,64 @@ const urlDatabase = {
 };
 
 //all helper functions
-  //1. helper function for checking duplicate email
-  function checkDuplicateEmail(email) {
-    for(let key in users){
-      if(users[key].email === email){
-        return true;
-      }
+//1. helper function for checking duplicate email
+function checkDuplicateEmail(email) {
+  for (let key in users) {
+    if (users[key].email === email) {
+      return true;
     }
-    return false;
   }
-  //2. helper functions for checking user credentials
-    //2a. lookup user by email
-    function lookupUserByEmail(users, email) {
-      for (const key in users) {
-        if (users[key].email === email) {
-          return key;
-        }
-      }
-      return false;
+  return false;
+}
+//2. helper functions for checking user credentials
+//2a. lookup user by email
+function lookupUserByEmail(users, email) {
+  for (const key in users) {
+    if (users[key].email === email) {
+      return key;
     }
-    //2b. check user email and password
-    const checkUserID = (users, email, password) => {
-      for (const key in users) {
-        if (users[key].email === email && users[key].password === password) {
-          return key;
-        }
-      }
-      return false;
-    };
+  }
+  return false;
+}
+//2b. check user email and password
+const checkUserID = (users, email, password) => {
+  for (const key in users) {
+    if (users[key].email === email && users[key].password === password) {
+      return key;
+    }
+  }
+  return false;
+};
   
 
 //route handler for GET/register
 app.get("/register", (req, res) => {
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
-  const templateVars = { 
+  const templateVars = {
     user: user
   };
   res.render("urls_register", templateVars);
-})
+});
 
 //route handler for POST/register
-app.post("/register", (req, res) => { 
+app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  if(!email || !password){ //check that email or password are not blank
+  if (!email || !password) { //check that email or password are not blank
     res.status(400).send("Please check the email or password! They cannot be empty.");
-  } 
+  }
   let result = checkDuplicateEmail(email);
-  if(result){ //email was already taken
-      res.status(400).send("This email has already been taken!");
-  } 
+  if (result) { //email was already taken
+    res.status(400).send("This email has already been taken!");
+  }
   //if the code is still running at this point, then the user can be registered.
   const user = generateRandomString(URL_LENGTH);
-  users[user] = { id: user, email, password }  
+  users[user] = { id: user, email, password };
   res.cookie('user_id', user);
-  console.log(`logged in as ${email}!`)
+  console.log(`logged in as ${email}!`);
   res.redirect('/urls');
-})
+});
 
 //route handlers for login
 app.get("/login", (req, res) => {
@@ -97,61 +99,61 @@ app.get("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const isValidUser = checkUserID(users, email, password);
-  const templateVars = { 
+  const templateVars = {
     user: user,
     isValidUser: isValidUser
   };
   res.render("urls_login", templateVars);
-})
+});
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  if(!email || !password){ //check that email or password are not blank
-    res.status(400).send("Please check the email or password! They cannot be empty.")
+  if (!email || !password) { //check that email or password are not blank
+    res.status(400).send("Please check the email or password! They cannot be empty.");
     return;
-  } 
+  }
   let user_key = lookupUserByEmail(users, email);
-  if(!user_key){
+  if (!user_key) {
     res.status(403).send(`User with email: ${email} was not found! Please register and try again.`);
     return;
   }
-  if(users[user_key].password !== password){
+  if (users[user_key].password !== password) {
     res.status(403).send(`Incorrect credentials! Please try again.`);
     return;
   }
-  const isValidUser = checkUserID(users, email, password)
-  if(isValidUser){
+  const isValidUser = checkUserID(users, email, password);
+  if (isValidUser) {
     user = isValidUser;
-    users[user] = { id: user, email, password }; 
+    users[user] = { id: user, email, password };
     res.cookie('user_id', user);
     return res.redirect('/urls');
   }
-  return res.status(400).send("Please login with valid email and password!")
-})
+  return res.status(400).send("Please login with valid email and password!");
+});
 
 //route handler for logout
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/login");
-})
+});
 
 //route handler for urls
 app.get("/urls", (req, res) => {
   const user_id = req.cookies["user_id"];
-  if(!user_id){
-    console.log("Please login to access the requested page!")
+  if (!user_id) {
+    console.log("Please login to access the requested page!");
     return res.redirect("/login");
   }
   const user = users[user_id];
   const email = user.email;
   const password = user.password;
-  const isLoggedIn = checkUserID(users, email, password)
-  const templateVars = { 
+  const isLoggedIn = checkUserID(users, email, password);
+  const templateVars = {
     urls: urlDatabase,
     user: user
   };
-  if(!isLoggedIn){
-    console.log("Please login to access the requested page!")
+  if (!isLoggedIn) {
+    console.log("Please login to access the requested page!");
     return res.redirect("/login");
   }
   res.render("urls_index", templateVars);
@@ -160,20 +162,20 @@ app.get("/urls", (req, res) => {
 //routes for url submission form
 app.get("/urls/new", (req, res) => {
   const user_id = req.cookies["user_id"];
-  if(!user_id){
-    console.log("Please login to access the requested page!")
+  if (!user_id) {
+    console.log("Please login to access the requested page!");
     return res.redirect("/login");
   }
   const user = users[user_id];
   const email = user.email;
   const password = user.password;
-  const isLoggedIn = checkUserID(users, email, password)
-  const templateVars = { 
+  const isLoggedIn = checkUserID(users, email, password);
+  const templateVars = {
     user: user,
     isLoggedIn: isLoggedIn
   };
-  if(!isLoggedIn){
-    console.log("Please login to access the requested page!")
+  if (!isLoggedIn) {
+    console.log("Please login to access the requested page!");
     return res.redirect("/login");
   }
   res.render("urls_new", templateVars);
@@ -183,9 +185,9 @@ app.post("/urls", (req, res) => {
   const user = users[user_id];
   const email = user.email;
   const password = user.password;
-  const isLoggedIn = checkUserID(users, email, password)
-  if(!isLoggedIn){
-    return res.status(401).send("Unauthorized request. Please login to access requested page.")
+  const isLoggedIn = checkUserID(users, email, password);
+  if (!isLoggedIn) {
+    return res.status(401).send("Unauthorized request. Please login to access requested page.");
   }
   const shortURL = generateRandomString(URL_LENGTH);
   const longURL = req.body.longURL;
@@ -198,8 +200,8 @@ app.get("/urls/:shortURL", (req, res) => {
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
   const shortURL = req.params.shortURL;
-  const templateVars = { 
-    shortURL, 
+  const templateVars = {
+    shortURL,
     longURL: urlDatabase[shortURL],
     user: user
   };
