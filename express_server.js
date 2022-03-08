@@ -30,6 +30,36 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+//all helper functions
+  //1. helper function for checking duplicate email
+  function checkDuplicateEmail(email) {
+    for(let key in users){
+      if(users[key].email === email){
+        return true;
+      }
+    }
+    return false;
+  }
+  //2. helper functions for checking user credentials
+    //2a. lookup user by email
+    function lookupUserByEmail(users, email) {
+      for (const key in users) {
+        if (users[key].email === email) {
+          return key;
+        }
+      }
+      return false;
+    }
+    //2b. check user email and password
+    const checkUserID = (users, email, password) => {
+      for (const key in users) {
+        if (users[key].email === email && users[key].password === password) {
+          return key;
+        }
+      }
+      return false;
+    };
+
 //route handler for GET/register
 app.get("/register", (req, res) => {
   const user_id = req.cookies["user_id"];
@@ -39,16 +69,6 @@ app.get("/register", (req, res) => {
   };
   res.render("urls_register", templateVars);
 })
-
-//helper function for checking duplicate email
-function checkDuplicateEmail(email) {
-  for(let key in users){
-    if(users[key].email === email){
-      return true;
-    }
-  }
-  return false;
-}
 
 //route handler for POST/register
 app.post("/register", (req, res) => { 
@@ -80,23 +100,6 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//helper functions for checking user credentials
-function lookupUserByEmail(users, email) {
-  for (const key in users) {
-    if (users[key].email === email) {
-      return key;
-    }
-  }
-  return false;
-}
-const checkUserID = (users, email, password) => {
-  for (const key in users) {
-    if (users[key].email === email && users[key].password === password) {
-      return key;
-    }
-  }
-  return false;
-};
 //route handlers for login
 app.get("/login", (req, res) => {
   const user_id = req.cookies["user_id"];
