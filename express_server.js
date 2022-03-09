@@ -15,22 +15,33 @@ app.use(express.static("public"));
 app.set("view engine", "ejs");
 
 const users = {
-  "userRandomID": {
-    id: "userRandomID",
+  "aJ48lW": {
+    id: "aJ48lW",
     email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
-  "user2RandomID": {
-    id: "user2RandomID",
+  "bJ48lW": {
+    id: "bJ48lW",
     email: "user2@example.com",
     password: "dishwasher-funk"
   }
 };
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b2xVn2: {
+        longURL: "http://www.lighthouselabs.ca",
+        userID: "aJ48lW"
+    },
+    i3BoGr: {
+        longURL: "https://www.google.ca",
+        userID: "bJ48lW"
+    }
 };
+
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
 
 //All helper functions
 //1. Helper function for checking duplicate email
@@ -94,7 +105,7 @@ app.post("/register", (req, res) => {
 
 //route handlers for login
 app.get("/login", (req, res) => {
-  const user_id = req.cookies["user_id"]; //DESTRUCTURE?
+  const user_id = req.cookies["user_id"]; 
   const user = users[user_id];
   // const email = req.body.email;
   // const password = req.body.password;
@@ -110,9 +121,9 @@ app.post("/login", (req, res) => {
   if (!email || !password) { //check that email or password are not blank
     return res.status(400).send("Please check the email or password! They cannot be empty.");
   }
-  let user_key = lookupUserByEmail(users, email);
+  const user_key = lookupUserByEmail(users, email);
   if (!user_key) {
-    return res.status(403).send(`User with email: ${email} was not found! Please register and try again.`);
+    return res.status(403).send(`Incorrect credentials! Please register and try again.`);
   }
   if (users[user_key].password !== password) {
     return res.status(403).send(`Incorrect credentials! Please try again.`);
@@ -178,6 +189,9 @@ app.get("/urls/new", (req, res) => {
 });
 app.post("/urls", (req, res) => {
   const user_id = req.cookies["user_id"];
+  if (!user_id) {
+    return res.status(401).send("Unauthorized request. Please login to access requested page.");
+  }
   const user = users[user_id];
   const email = user.email;
   const password = user.password;
@@ -187,7 +201,7 @@ app.post("/urls", (req, res) => {
   }
   const shortURL = generateRandomString(URL_LENGTH);
   const longURL = req.body.longURL;
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL] = { longURL: longURL, userID: user_id};
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -198,7 +212,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const templateVars = {
     shortURL,
-    longURL: urlDatabase[shortURL],
+    longURL: urlDatabase[shortURL].longURL,
     user: user
   };
   res.render("urls_show", templateVars);
@@ -207,15 +221,16 @@ app.get("/urls/:shortURL", (req, res) => {
 //route to handle short URL requests
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL];
+  const longURL = urlDatabase[shortURL].longURL;
   res.redirect(longURL);
 });
 
 //route handler for updating URLs
 app.post("/urls/:id", (req, res) => {
+  const user_id = req.cookies["user_id"];
   const shortURL = req.params.id;
   const longURL = req.body.edit;
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL] = { longURL: longURL, userID: user_id};
   res.redirect("/urls");
 });
 
@@ -229,3 +244,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+//Driver code
+console.log(urlDatabase);
