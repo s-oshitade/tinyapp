@@ -30,14 +30,15 @@ const users = {
 
 const urlDatabase = {
   sgq3y6: {
-        longURL: "http://www.lighthouselabs.ca",
-        userID: "aJ48lW"
-    },
-    i3BoGr: {
-        longURL: "https://www.google.ca",
-        userID: "aJ48lW"
-    }
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "aJ48lW"
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW"
+  }
 };
+
 
 //All helper functions
 //1. Helper function for checking duplicate email
@@ -82,8 +83,7 @@ app.get("/register", (req, res) => {
 
 //Route handler for POST/register
 app.post("/register", (req, res) => {
-  const {email, password} = req.body; 
-  const hashedPassword = bcrypt.hashSync(password, 10);
+  const {email, password} = req.body;
   if (!email || !password) { //check that email or password are not blank
     return res.status(400).send("<h2>Please check the email or password! They cannot be empty.</h2>");
   }
@@ -91,17 +91,18 @@ app.post("/register", (req, res) => {
   if (result) { //email was already taken
     return res.status(400).send("<h2>This email has already been taken!</h2>");
   }
-  //if the code is still running at this point, then the user can be registered.
+  const hashedPassword = bcrypt.hashSync(password, 10); //hash password
+  //if the code is still running at this point, then the user can be registered
   const user = generateRandomString(URL_LENGTH);
-  users[user] = { id: user, email, password };
+  users[user] = { id: user, email, password: hashedPassword };
   res.cookie('user_id', user);
-  console.log(`logged in as ${email}!`);
+  console.log(users);
   res.redirect('/urls');
 });
 
 //route handlers for login
 app.get("/login", (req, res) => {
-  const user_id = req.cookies["user_id"]; 
+  const user_id = req.cookies["user_id"];
   const user = users[user_id];
   // const email = req.body.email;
   // const password = req.body.password;
@@ -113,25 +114,32 @@ app.get("/login", (req, res) => {
   res.render("urls_login", templateVars);
 });
 app.post("/login", (req, res) => {
-  const {email, password} = req.body; 
+  const {email, password} = req.body;
+  // const hashedPassword = req.cookies["hashedPassword"];
   if (!email || !password) { //check that email or password are not blank
-    return res.status(400).send("<h2>Please check the email or password! They cannot be empty.</h2>");
+    return res.status(400).send("<h2>1. Please check the email or password! They cannot be empty.</h2>");
   }
+  // const user_key = lookupUserByEmail(users, email);
+  // if (!user_key) {
+  //   return res.status(403).send("<h2>Incorrect credentials! Please register and try again.</h2>");
+  // }
+  
   const user_key = lookupUserByEmail(users, email);
-  if (!user_key) {
-    return res.status(403).send("<h2>Incorrect credentials! Please register and try again.</h2>");
+  if (user_key) {
+    if (bcrypt.compareSync(password, users[user_key].password)) {
+      //   users[user_key] = { id: user, email, password };
+      res.cookie('user_id', user_key);
+      return res.redirect('/urls');
+    }
   }
-  if (users[user_key].password !== password) {
-    return res.status(403).send("<h2>Incorrect credentials! Please try again</h2>");
-  }
-  const isValidUser = checkUserID(users, email, password);
-  if (isValidUser) {
-    user = isValidUser;
-    users[user] = { id: user, email, password };
-    res.cookie('user_id', user);
-    return res.redirect('/urls');
-  }
-  return res.status(400).send("<h2>Please login with valid email and password!</h2>");
+  return res.status(403).send("<h2>Invalid credentials! Please try again</h2>");
+  // const isValidUser = checkUserID(users, email, password);
+  // if (isValidUser) {
+  //   user = isValidUser;
+  //   users[user] = { id: user, email, password };
+  //   res.cookie('user_id', user);
+  //   return res.redirect('/urls');
+  // }
 });
 
 //route handler for logout
@@ -159,20 +167,20 @@ app.get("/urls", (req, res) => {
     return res.redirect("/login");
   }
   //Filter urlDatabase by comparing userID with logged-in user's ID
-  const urlsForUser = function (id) {
+  const urlsForUser = function(id) {
     const user_id = req.cookies["user_id"];
     const user = users[user_id];
     const email = user.email;
     const password = user.password;
     const isLoggedIn = checkUserID(users, email, password);
-    let userUrlDatabase = {}
-    for(const shortURL in urlDatabase){
-      if(isLoggedIn === urlDatabase[shortURL].userID){
-       userUrlDatabase[shortURL] = urlDatabase[shortURL].longURL;
+    let userUrlDatabase = {};
+    for (const shortURL in urlDatabase) {
+      if (isLoggedIn === urlDatabase[shortURL].userID) {
+        userUrlDatabase[shortURL] = urlDatabase[shortURL].longURL;
       }
     }
     return userUrlDatabase;
-  }
+  };
   userUrlDatabase = urlsForUser(isLoggedIn);
   templateVars.urls = userUrlDatabase;
   res.render("urls_index", templateVars);
@@ -220,7 +228,7 @@ app.post("/urls", (req, res) => {
 //Route handler to show single URL and its shortened form
 app.get("/urls/:shortURL", (req, res) => {
   const user_id = req.cookies["user_id"];
-  if(!user_id){
+  if (!user_id) {
     return res.status(403).send("<h1>Please login to access the requested page!</h1>");
   }
   const user = users[user_id];
@@ -242,7 +250,7 @@ app.get("/urls/:shortURL", (req, res) => {
 //route to handle short URL requests
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  if(!urlDatabase[shortURL]){
+  if (!urlDatabase[shortURL]) {
     return res.status(400).send("<h2>The requested resource does not exist!</h2>");
   }
   const longURL = urlDatabase[shortURL].longURL;
@@ -252,7 +260,7 @@ app.get("/u/:shortURL", (req, res) => {
 //route handler for updating URLs
 app.post("/urls/:id", (req, res) => {
   const user_id = req.cookies["user_id"];
-  if(!user_id){
+  if (!user_id) {
     return res.status(403).send("<h1>Please login to access the requested page!</h1>");
   }
   const user = users[user_id];
