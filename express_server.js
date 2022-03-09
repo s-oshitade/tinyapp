@@ -148,8 +148,7 @@ app.post("/logout", (req, res) => {
 app.get("/urls", (req, res) => {
   const user_id = req.cookies["user_id"];
   if (!user_id) {
-    console.log("Please login to access the requested page!");
-    return res.redirect("/login");
+    return res.status(403).send("Please login or register to access the requested page!");
   }
   const user = users[user_id];
   const email = user.email;
