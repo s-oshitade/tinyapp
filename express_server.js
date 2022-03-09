@@ -28,7 +28,7 @@ const users = {
 };
 
 const urlDatabase = {
-  b2xVn2: {
+  sgq3y6: {
         longURL: "http://www.lighthouselabs.ca",
         userID: "aJ48lW"
     },
@@ -172,7 +172,6 @@ app.get("/urls", (req, res) => {
     return userUrlDatabase;
   }
   userUrlDatabase = urlsForUser(isLoggedIn);
-  console.log("USERDATABASE: ", userUrlDatabase);
   templateVars.urls = userUrlDatabase;
   res.render("urls_index", templateVars);
 });
@@ -219,7 +218,16 @@ app.post("/urls", (req, res) => {
 //Route handler to show single URL and its shortened form
 app.get("/urls/:shortURL", (req, res) => {
   const user_id = req.cookies["user_id"];
+  if(!user_id){
+    return res.status(403).send("<h1>Please login to access the requested page!</h1>");
+  }
   const user = users[user_id];
+  const email = user.email;
+  const password = user.password;
+  const isLoggedIn = checkUserID(users, email, password);
+  if (!isLoggedIn) {
+    return res.status(403).send("<h1>Please login to access the requested page!</h1>");
+  }
   const shortURL = req.params.shortURL;
   const templateVars = {
     shortURL,
@@ -242,6 +250,16 @@ app.get("/u/:shortURL", (req, res) => {
 //route handler for updating URLs
 app.post("/urls/:id", (req, res) => {
   const user_id = req.cookies["user_id"];
+  if(!user_id){
+    return res.status(403).send("<h1>Please login to access the requested page!</h1>");
+  }
+  const user = users[user_id];
+  const email = user.email;
+  const password = user.password;
+  const isLoggedIn = checkUserID(users, email, password);
+  if (!isLoggedIn) {
+    return res.status(403).send("<h1>Please login to access the requested page!</h1>");
+  }
   const shortURL = req.params.id;
   const longURL = req.body.edit;
   urlDatabase[shortURL] = { longURL: longURL, userID: user_id};
@@ -250,6 +268,17 @@ app.post("/urls/:id", (req, res) => {
 
 //route handler for deleting URLs
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const user_id = req.cookies["user_id"];
+  if (!user_id) {
+    return res.status(401).send("<h2>Please login to access requested page.</h2>");
+  }
+  const user = users[user_id];
+  const email = user.email;
+  const password = user.password;
+  const isLoggedIn = checkUserID(users, email, password);
+  if (!isLoggedIn) {
+    return res.status(401).send("<h2>Please login to access requested page.</h2>");
+  }
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect("/urls");
