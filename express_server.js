@@ -3,6 +3,7 @@ const express = require("express");
 const morgan = require('morgan');
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080;
 
@@ -82,6 +83,7 @@ app.get("/register", (req, res) => {
 //Route handler for POST/register
 app.post("/register", (req, res) => {
   const {email, password} = req.body; 
+  const hashedPassword = bcrypt.hashSync(password, 10);
   if (!email || !password) { //check that email or password are not blank
     return res.status(400).send("<h2>Please check the email or password! They cannot be empty.</h2>");
   }
