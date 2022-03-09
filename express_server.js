@@ -221,6 +221,9 @@ app.get("/urls/:shortURL", (req, res) => {
 //route to handle short URL requests
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
+  if(!urlDatabase[shortURL]){
+    return res.status(400).send(`The requested resource does not exist!`);
+  }
   const longURL = urlDatabase[shortURL].longURL;
   res.redirect(longURL);
 });
