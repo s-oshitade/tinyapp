@@ -33,7 +33,7 @@ const urlDatabase = {
 };
 
 //All helper functions
-//1. Celper function for checking duplicate email
+//1. Helper function for checking duplicate email
 function checkDuplicateEmail(email) {
   for (let key in users) {
     if (users[key].email === email) {
@@ -63,7 +63,7 @@ const checkUserID = (users, email, password) => {
 };
   
 
-//route handler for GET/register
+//Route handler for GET/register
 app.get("/register", (req, res) => {
   const user_id = req.cookies["user_id"];
   const user = users[user_id];
@@ -74,10 +74,9 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars);
 });
 
-//route handler for POST/register
+//Route handler for POST/register
 app.post("/register", (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
+  const {email, password} = req.body; 
   if (!email || !password) { //check that email or password are not blank
     return res.status(400).send("Please check the email or password! They cannot be empty.");
   }
@@ -95,7 +94,7 @@ app.post("/register", (req, res) => {
 
 //route handlers for login
 app.get("/login", (req, res) => {
-  const user_id = req.cookies["user_id"];
+  const user_id = req.cookies["user_id"]; //DESTRUCTURE?
   const user = users[user_id];
   // const email = req.body.email;
   // const password = req.body.password;
@@ -107,8 +106,7 @@ app.get("/login", (req, res) => {
   res.render("urls_login", templateVars);
 });
 app.post("/login", (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
+  const {email, password} = req.body; 
   if (!email || !password) { //check that email or password are not blank
     return res.status(400).send("Please check the email or password! They cannot be empty.");
   }
