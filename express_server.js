@@ -34,14 +34,9 @@ const urlDatabase = {
     },
     i3BoGr: {
         longURL: "https://www.google.ca",
-        userID: "bJ48lW"
+        userID: "aJ48lW"
     }
 };
-
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
 
 //All helper functions
 //1. Helper function for checking duplicate email
@@ -72,7 +67,6 @@ const checkUserID = (users, email, password) => {
   }
   return false;
 };
-  
 
 //Route handler for GET/register
 app.get("/register", (req, res) => {
@@ -89,11 +83,11 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const {email, password} = req.body; 
   if (!email || !password) { //check that email or password are not blank
-    return res.status(400).send("Please check the email or password! They cannot be empty.");
+    return res.status(400).send("<h2>Please check the email or password! They cannot be empty.</h2>");
   }
   let result = checkDuplicateEmail(email);
   if (result) { //email was already taken
-    return res.status(400).send("This email has already been taken!");
+    return res.status(400).send("<h2>This email has already been taken!</h2>");
   }
   //if the code is still running at this point, then the user can be registered.
   const user = generateRandomString(URL_LENGTH);
@@ -119,14 +113,14 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const {email, password} = req.body; 
   if (!email || !password) { //check that email or password are not blank
-    return res.status(400).send("Please check the email or password! They cannot be empty.");
+    return res.status(400).send("<h2>Please check the email or password! They cannot be empty.</h2>");
   }
   const user_key = lookupUserByEmail(users, email);
   if (!user_key) {
-    return res.status(403).send(`Incorrect credentials! Please register and try again.`);
+    return res.status(403).send("<h2>Incorrect credentials! Please register and try again.</h2>");
   }
   if (users[user_key].password !== password) {
-    return res.status(403).send(`Incorrect credentials! Please try again.`);
+    return res.status(403).send("<h2>Incorrect credentials! Please try again</h2>");
   }
   const isValidUser = checkUserID(users, email, password);
   if (isValidUser) {
@@ -135,7 +129,7 @@ app.post("/login", (req, res) => {
     res.cookie('user_id', user);
     return res.redirect('/urls');
   }
-  return res.status(400).send("Please login with valid email and password!");
+  return res.status(400).send("<h2>Please login with valid email and password!</h2>");
 });
 
 //route handler for logout
@@ -148,7 +142,7 @@ app.post("/logout", (req, res) => {
 app.get("/urls", (req, res) => {
   const user_id = req.cookies["user_id"];
   if (!user_id) {
-    return res.status(403).send("Please login or register to access the requested page!");
+    return res.status(403).send("<h2>Please login or register to access the requested page!</h2>");
   }
   const user = users[user_id];
   const email = user.email;
@@ -162,6 +156,24 @@ app.get("/urls", (req, res) => {
     console.log("Please login to access the requested page!");
     return res.redirect("/login");
   }
+  //Filter urlDatabase by comparing userID with logged-in user's ID
+  const urlsForUser = function (id) {
+    const user_id = req.cookies["user_id"];
+    const user = users[user_id];
+    const email = user.email;
+    const password = user.password;
+    const isLoggedIn = checkUserID(users, email, password);
+    let userUrlDatabase = {}
+    for(const shortURL in urlDatabase){
+      if(isLoggedIn === urlDatabase[shortURL].userID){
+       userUrlDatabase[shortURL] = urlDatabase[shortURL].longURL;
+      }
+    }
+    return userUrlDatabase;
+  }
+  userUrlDatabase = urlsForUser(isLoggedIn);
+  console.log("USERDATABASE: ", userUrlDatabase);
+  templateVars.urls = userUrlDatabase;
   res.render("urls_index", templateVars);
 });
 
@@ -189,14 +201,14 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   const user_id = req.cookies["user_id"];
   if (!user_id) {
-    return res.status(401).send("Unauthorized request. Please login to access requested page.");
+    return res.status(401).send("<h2>Unauthorized request. Please login to access requested page.</h2>");
   }
   const user = users[user_id];
   const email = user.email;
   const password = user.password;
   const isLoggedIn = checkUserID(users, email, password);
   if (!isLoggedIn) {
-    return res.status(401).send("Unauthorized request. Please login to access requested page.");
+    return res.status(401).send("<h2>Unauthorized request. Please login to access requested page.</h2>");
   }
   const shortURL = generateRandomString(URL_LENGTH);
   const longURL = req.body.longURL;
@@ -221,7 +233,7 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   if(!urlDatabase[shortURL]){
-    return res.status(400).send(`The requested resource does not exist!`);
+    return res.status(400).send("<h2>The requested resource does not exist!</h2>");
   }
   const longURL = urlDatabase[shortURL].longURL;
   res.redirect(longURL);
