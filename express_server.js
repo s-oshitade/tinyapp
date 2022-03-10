@@ -1,4 +1,3 @@
-const { generateRandomString, URL_LENGTH } = require('./generate-random-string');
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
@@ -6,6 +5,13 @@ const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080;
+const {
+  URL_LENGTH,
+  generateRandomString,
+  getUserByEmail,
+  checkDuplicateEmail,
+  checkUserID
+} = require('./helpers');
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: true}));
@@ -43,37 +49,6 @@ const urlDatabase = {
   }
 };
 
-
-//All helper functions
-//1. Helper function for checking duplicate email
-function checkDuplicateEmail(email) {
-  for (let key in users) {
-    if (users[key].email === email) {
-      return true;
-    }
-  }
-  return false;
-}
-//2. helper functions for checking user credentials
-//2a. lookup user by email
-function lookupUserByEmail(users, email) {
-  for (const key in users) {
-    if (users[key].email === email) {
-      return key;
-    }
-  }
-  return false;
-}
-//2b. check user email and password
-const checkUserID = (users, email, password) => {
-  for (const key in users) {
-    if (users[key].email === email && users[key].password === password) {
-      return key;
-    }
-  }
-  return false;
-};
-
 //Route handler for GET/register
 app.get("/register", (req, res) => {
   const user_id = req.session.user_id;
@@ -91,9 +66,9 @@ app.post("/register", (req, res) => {
   if (!email || !password) { //check that email or password are not blank
     return res.status(400).send("<h2>Please check the email or password! They cannot be empty.</h2>");
   }
-  let result = checkDuplicateEmail(email);
+  let result = checkDuplicateEmail(users, email);
   if (result) { //email was already taken
-    return res.status(400).send("<h2>This email has already been taken!</h2>");
+    return res.status(400).send("<h2>This email has already been taken! Login <a href='/login'>here</a>.</h2>");
   }
   const hashedPassword = bcrypt.hashSync(password, 10); //hash password
   //if the code is still running at this point, then the user can be registered
@@ -119,9 +94,9 @@ app.post("/login", (req, res) => {
   if (!email || !password) { //check that email or password are not blank
     return res.status(400).send("<h2>1. Please check the email or password! They cannot be empty.</h2>");
   }
-  const user_key = lookupUserByEmail(users, email);
+  const user_key = getUserByEmail(users, email);
   if (!user_key) {
-    return res.status(403).send("<h2>User does not exist. Please register <a href='/register'>here</a>!</h2>");
+    return res.status(403).send("<h2>Invalid request. Please register <a href='/register'>here</a>!</h2>");
   }
   if (user_key) {
     if (bcrypt.compareSync(password, users[user_key].password)) {
@@ -140,6 +115,9 @@ app.post("/logout", (req, res) => {
 
 //route handler for urls
 app.get("/urls", (req, res) => {
+  if (!req.session.user_id) {
+    return res.status(400).send("<h2>Please <a href='/register'>register</a> or <a href='/login'>login</a> to access the requested page!</h2>");
+  }
   const user_id = req.session.user_id;
   if (!user_id) {
     return res.status(403).send("<h2>Please login <a href='/login'>here</a> to access the requested page!</h2>");
@@ -178,6 +156,9 @@ app.get("/urls", (req, res) => {
 
 //Routes for url submission form
 app.get("/urls/new", (req, res) => {
+  if (!req.session.user_id) {
+    return res.status(400).send("<h2>Please <a href='/register'>register</a> or <a href='/login'>login</a> to access the requested page!</h2>");
+  }
   const user_id = req.session.user_id;
   if (!user_id) {
     return res.status(403).send("<h2>Please login <a href='/login'>here</a> to access the requested page!</h2>");
@@ -196,6 +177,7 @@ app.get("/urls/new", (req, res) => {
   }
   res.render("urls_new", templateVars);
 });
+
 app.post("/urls", (req, res) => {
   const user_id = req.session.user_id;
   if (!user_id) {
@@ -240,7 +222,7 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   if (!urlDatabase[shortURL]) {
-    return res.status(400).send("<h2>The requested resource does not exist!</h2>");
+    return res.status(400).send("<h2> Invalid request! Please use the format https://www.google.com</h2>");
   }
   const longURL = urlDatabase[shortURL].longURL;
   res.redirect(longURL);
