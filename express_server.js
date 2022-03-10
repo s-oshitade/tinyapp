@@ -13,7 +13,7 @@ app.use(cookieSession({
   name: 'session',
   keys: ["key1"],
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}))
+}));
 app.use(express.static("public"));
 
 //set ejs as the view engine
@@ -120,8 +120,8 @@ app.post("/login", (req, res) => {
     return res.status(400).send("<h2>1. Please check the email or password! They cannot be empty.</h2>");
   }
   const user_key = lookupUserByEmail(users, email);
-  if(!user_key){
-    return res.status(403).send("<h2>User does not exist. Please register <a href='/register'>here</a>!</h2>")
+  if (!user_key) {
+    return res.status(403).send("<h2>User does not exist. Please register <a href='/register'>here</a>!</h2>");
   }
   if (user_key) {
     if (bcrypt.compareSync(password, users[user_key].password)) {
