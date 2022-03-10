@@ -3,7 +3,6 @@ const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
-// const cookieParser = require('cookie-parser'); /* @TODO - delete */
 const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080;
@@ -15,7 +14,6 @@ app.use(cookieSession({
   keys: ["key1"],
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }))
-// app.use(cookieParser());
 app.use(express.static("public"));
 
 //set ejs as the view engine
@@ -78,7 +76,6 @@ const checkUserID = (users, email, password) => {
 
 //Route handler for GET/register
 app.get("/register", (req, res) => {
-  // const user_id = req.cookies["user_id"];
   const user_id = req.session.user_id;
   const user = users[user_id];
   const templateVars = {
@@ -111,60 +108,41 @@ app.post("/register", (req, res) => {
 //route handlers for login
 app.get("/login", (req, res) => {
   const user_id = req.session.user_id;
-  // const user_id = req.cookies["user_id"];
   const user = users[user_id];
-  // const email = req.body.email;
-  // const password = req.body.password;
-  // const isValidUser = checkUserID(users, email, password);
   const templateVars = {
     user: user,
-    // isValidUser: isValidUser
   };
   res.render("urls_login", templateVars);
 });
 app.post("/login", (req, res) => {
   const {email, password} = req.body;
-  // const hashedPassword = req.cookies["hashedPassword"];
   if (!email || !password) { //check that email or password are not blank
     return res.status(400).send("<h2>1. Please check the email or password! They cannot be empty.</h2>");
   }
-  // const user_key = lookupUserByEmail(users, email);
-  // if (!user_key) {
-  //   return res.status(403).send("<h2>Incorrect credentials! Please register and try again.</h2>");
-  // }
-  
   const user_key = lookupUserByEmail(users, email);
+  if(!user_key){
+    return res.status(403).send("<h2>User does not exist. Please register <a href='/register'>here</a>!</h2>")
+  }
   if (user_key) {
     if (bcrypt.compareSync(password, users[user_key].password)) {
-      //   users[user_key] = { id: user, email, password };
-      // res.cookie('user_id', user_key);
       req.session.user_id = user_key;
       return res.redirect('/urls');
     }
   }
-  return res.status(403).send("<h2>Invalid credentials! Please try again</h2>");
-  // const isValidUser = checkUserID(users, email, password);
-  // if (isValidUser) {
-  //   user = isValidUser;
-  //   users[user] = { id: user, email, password };
-  //   res.cookie('user_id', user);
-  //   return res.redirect('/urls');
-  // }
+  return res.status(403).send("<h2>Invalid credentials! Please <a href='/register'>try</a> again.</h2>");
 });
 
 //route handler for logout
 app.post("/logout", (req, res) => {
   req.session = null;
-  // res.clearCookie("user_id");
   res.redirect("/login");
 });
 
 //route handler for urls
 app.get("/urls", (req, res) => {
   const user_id = req.session.user_id;
-  // const user_id = req.cookies["user_id"];
   if (!user_id) {
-    return res.status(403).send("<h2>Please login or register to access the requested page!</h2>");
+    return res.status(403).send("<h2>Please login <a href='/login'>here</a> to access the requested page!</h2>");
   }
   const user = users[user_id];
   const email = user.email;
@@ -175,13 +153,12 @@ app.get("/urls", (req, res) => {
     user: user
   };
   if (!isLoggedIn) {
-    console.log("Please login to access the requested page!");
+    console.log("Please login <a href='/login'>here</a> to access the requested page!");
     return res.redirect("/login");
   }
   //Filter urlDatabase by comparing userID with logged-in user's ID
   const urlsForUser = function(id) {
     const user_id = req.session.user_id;
-    // const user_id = req.cookies["user_id"];
     const user = users[user_id];
     const email = user.email;
     const password = user.password;
@@ -202,10 +179,8 @@ app.get("/urls", (req, res) => {
 //Routes for url submission form
 app.get("/urls/new", (req, res) => {
   const user_id = req.session.user_id;
-  // const user_id = req.cookies["user_id"];
   if (!user_id) {
-    console.log("Please login to access the requested page!");
-    return res.redirect("/login");
+    return res.status(403).send("<h2>Please login <a href='/login'>here</a> to access the requested page!</h2>");
   }
   const user = users[user_id]; //Use info from cookie to access user object
   const email = user.email;
@@ -216,23 +191,22 @@ app.get("/urls/new", (req, res) => {
     isLoggedIn: isLoggedIn
   };
   if (!isLoggedIn) {
-    console.log("Please login to access the requested page!");
+    console.log("Please login <a href='/login'>here</a> to access the requested page!");
     return res.redirect("/login");
   }
   res.render("urls_new", templateVars);
 });
 app.post("/urls", (req, res) => {
   const user_id = req.session.user_id;
-  // const user_id = req.cookies["user_id"];
   if (!user_id) {
-    return res.status(401).send("<h2>Unauthorized request. Please login to access requested page.</h2>");
+    return res.status(401).send("<h2>Unauthorized request. Please login <a href='/login'>here</a> to access the requested page!</h2>");
   }
   const user = users[user_id];
   const email = user.email;
   const password = user.password;
   const isLoggedIn = checkUserID(users, email, password);
   if (!isLoggedIn) {
-    return res.status(401).send("<h2>Unauthorized request. Please login to access requested page.</h2>");
+    return res.status(401).send("<h2>Unauthorized request. Please login <a href='/login'>here</a> to access the requested page!</h2>");
   }
   const shortURL = generateRandomString(URL_LENGTH);
   const longURL = req.body.longURL;
@@ -243,16 +217,15 @@ app.post("/urls", (req, res) => {
 //Route handler to show single URL and its shortened form
 app.get("/urls/:shortURL", (req, res) => {
   const user_id = req.session.user_id;
-  // const user_id = req.cookies["user_id"];
   if (!user_id) {
-    return res.status(403).send("<h1>Please login to access the requested page!</h1>");
+    return res.status(403).send("<h2>Please login <a href='/login'>here</a> to access the requested page!</h1>");
   }
   const user = users[user_id];
   const email = user.email;
   const password = user.password;
   const isLoggedIn = checkUserID(users, email, password);
   if (!isLoggedIn) {
-    return res.status(403).send("<h1>Please login to access the requested page!</h1>");
+    return res.status(403).send("<h2>Please login <a href='/login'>here</a> to access the requested page!</h1>");
   }
   const shortURL = req.params.shortURL;
   const templateVars = {
@@ -276,16 +249,15 @@ app.get("/u/:shortURL", (req, res) => {
 //route handler for updating URLs
 app.post("/urls/:id", (req, res) => {
   const user_id = req.session.user_id;
-  // const user_id = req.cookies["user_id"];
   if (!user_id) {
-    return res.status(403).send("<h1>Please login to access the requested page!</h1>");
+    return res.status(403).send("<h1>Please login <a href='/login'>here</a> to access the requested page!</h1>");
   }
   const user = users[user_id];
   const email = user.email;
   const password = user.password;
   const isLoggedIn = checkUserID(users, email, password);
   if (!isLoggedIn) {
-    return res.status(403).send("<h1>Please login to access the requested page!</h1>");
+    return res.status(403).send("<h1>Please login <a href='/login'>here</a> to access the requested page!</h1>");
   }
   const shortURL = req.params.id;
   const longURL = req.body.edit;
@@ -296,16 +268,15 @@ app.post("/urls/:id", (req, res) => {
 //route handler for deleting URLs
 app.post("/urls/:shortURL/delete", (req, res) => {
   const user_id = req.session.user_id;
-  // const user_id = req.cookies["user_id"];
   if (!user_id) {
-    return res.status(401).send("<h2>Please login to access requested page.</h2>");
+    return res.status(401).send("<h2>Please login <a href='/login'>here</a> to access the requested page!</h2>");
   }
   const user = users[user_id];
   const email = user.email;
   const password = user.password;
   const isLoggedIn = checkUserID(users, email, password);
   if (!isLoggedIn) {
-    return res.status(401).send("<h2>Please login to access requested page.</h2>");
+    return res.status(401).send("<h2>Please login <a href='/login'>here</a> to access the requested page!</h2>");
   }
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
