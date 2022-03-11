@@ -22,7 +22,7 @@ app.use(cookieSession({
 }));
 app.use(express.static("public"));
 
-//set ejs as the view engine
+//Set ejs as the view engine
 app.set("view engine", "ejs");
 
 // Database A - users 
@@ -58,7 +58,6 @@ app.get("/register", (req, res) => {
   const templateVars = {
     user: user
   };
-  console.log(user);
   res.render("urls_register", templateVars);
 });
 
@@ -77,7 +76,6 @@ app.post("/register", (req, res) => {
   const user = generateRandomString(URL_LENGTH);
   users[user] = { id: user, email, password: hashedPassword };
   req.session.user_id = user;
-  console.log(users);
   res.redirect('/urls');
 });
 
@@ -100,8 +98,6 @@ app.post("/login", (req, res) => {
     return res.status(403).send("<h2>Invalid request. Please register <a href='/register'>here</a>!</h2>");
   }
   if (user) {
-    console.log("user object", user)
-    console.log("password", user.password)
     if (bcrypt.compareSync(password, user.password)) {
       req.session.user_id = user.id;
       return res.redirect('/urls');
@@ -134,8 +130,7 @@ app.get("/urls", (req, res) => {
     user: user
   };
   if (!isLoggedIn) {
-    console.log("Please login <a href='/login'>here</a> to access the requested page!");
-    return res.redirect("/login");
+    return res.status(403).send("<h2>Please login <a href='/login'>here</a> to access the requested page!</h2>");
   }
   //Filter urlDatabase by comparing userID with logged-in user's ID
   const urlsForUser = function(id) {
@@ -175,8 +170,7 @@ app.get("/urls/new", (req, res) => {
     isLoggedIn: isLoggedIn
   };
   if (!isLoggedIn) {
-    console.log("Please login <a href='/login'>here</a> to access the requested page!");
-    return res.redirect("/login");
+    return res.status(403).send("<h2>Please login <a href='/login'>here</a> to access the requested page!</h2>");
   }
   res.render("urls_new", templateVars);
 });
@@ -257,14 +251,14 @@ app.post("/urls/:id", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   const user_id = req.session.user_id;
   if (!user_id) {
-    return res.status(401).send("<h2>Please login <a href='/login'>here</a> to access the requested page!</h2>");
+    return res.status(401).send("<h2>123Please login <a href='/login'>here</a> to access the requested page!</h2>");
   }
   const user = users[user_id];
   const email = user.email;
   const password = user.password;
   const isLoggedIn = checkUserID(users, email, password);
   if (!isLoggedIn) {
-    return res.status(401).send("<h2>Please login <a href='/login'>here</a> to access the requested page!</h2>");
+    return res.status(401).send("<h2>456Please login <a href='/login'>here</a> to access the requested page!</h2>");
   }
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
@@ -275,5 +269,3 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-console.log("Here's the users database: ", users)
-console.log("Here's the url database: ", urlDatabase)
