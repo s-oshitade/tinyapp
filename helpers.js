@@ -23,7 +23,8 @@ const generateRandomString = (URL_LENGTH) => {
 function getUserByEmail(users, email) {
   for (const key in users) {
     if (users[key].email === email) {
-      return key;
+      const user = users[key];
+      return user;
     }
   }
   return false;
