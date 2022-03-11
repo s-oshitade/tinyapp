@@ -22,7 +22,7 @@ This project was completed by [me](https://www.linkedin.com/in/seun-oshitade-530
 ## Getting Started
 
 - Install all dependencies (using the `npm install` command).
-- Run the development web server using the `node express_server.js` command.
+- Run the development web server using the `npm start` command.
 
 ## Continous Improvement
 * Method override
