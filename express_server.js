@@ -18,26 +18,28 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
   name: 'session',
   keys: ["key1"],
-  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  maxAge: 24 * 60 * 60 * 1000 
 }));
 app.use(express.static("public"));
 
 //set ejs as the view engine
 app.set("view engine", "ejs");
 
+// Database A - users 
 const users = {
   "aJ48lW": {
     id: "aJ48lW",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "$2a$10$f9h.jr0QmzuotWBYI4RkpO7OGSwE4Yx/vYlFqo/nEPwGQJH0uN04q"
   },
   "bJ48lW": {
     id: "bJ48lW",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: "$2a$10$f9h.jr0QmzuotWBYI4RkpO7OGSwE4Yx/vYlFqo/nEPwGQJH0uN04q"
   }
 };
 
+// Database B - urlDatabase
 const urlDatabase = {
   sgq3y6: {
     longURL: "http://www.lighthouselabs.ca",
@@ -74,13 +76,12 @@ app.post("/register", (req, res) => {
   //if the code is still running at this point, then the user can be registered
   const user = generateRandomString(URL_LENGTH);
   users[user] = { id: user, email, password: hashedPassword };
-  // res.cookie('user_id', user);
   req.session.user_id = user;
   console.log(users);
   res.redirect('/urls');
 });
 
-//route handlers for login
+//Route handlers for login
 app.get("/login", (req, res) => {
   const user_id = req.session.user_id;
   const user = users[user_id];
@@ -109,13 +110,13 @@ app.post("/login", (req, res) => {
   return res.status(403).send("<h2>Invalid credentials! Please <a href='/register'>try</a> again.</h2>");
 });
 
-//route handler for logout
+//Route handler for logout
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/login");
 });
 
-//route handler for urls
+//Route handler for urls
 app.get("/urls", (req, res) => {
   if (!req.session.user_id) {
     return res.status(400).send("<h2>Please <a href='/register'>register</a> or <a href='/login'>login</a> to access the requested page!</h2>");
@@ -212,6 +213,9 @@ app.get("/urls/:shortURL", (req, res) => {
     return res.status(403).send("<h2>Please login <a href='/login'>here</a> to access the requested page!</h1>");
   }
   const shortURL = req.params.shortURL;
+  if(!urlDatabase[shortURL]){
+    return res.status(400).send(`<h2> Invalid request! ${shortURL} does not exist on user's url database. </h2>`);
+  }
   const templateVars = {
     shortURL,
     longURL: urlDatabase[shortURL].longURL,
@@ -220,17 +224,17 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-//route to handle short URL requests
+//Route to handle short URL requests
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   if (!urlDatabase[shortURL]) {
-    return res.status(400).send("<h2> Invalid request! Please use the format https://www.google.com</h2>");
+    return res.status(400).send("<h2> Invalid request! Please use the format https://www.domainName.com</h2>");
   }
   const longURL = urlDatabase[shortURL].longURL;
   res.redirect(longURL);
 });
 
-//route handler for updating URLs
+//Route handler for updating URLs
 app.post("/urls/:id", (req, res) => {
   const user_id = req.session.user_id;
   if (!user_id) {
@@ -249,7 +253,7 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
-//route handler for deleting URLs
+//Route handler for deleting URLs
 app.post("/urls/:shortURL/delete", (req, res) => {
   const user_id = req.session.user_id;
   if (!user_id) {
@@ -271,3 +275,5 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
+console.log("Here's the users database: ", users)
+console.log("Here's the url database: ", urlDatabase)
