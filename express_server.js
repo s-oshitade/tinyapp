@@ -94,13 +94,15 @@ app.post("/login", (req, res) => {
   if (!email || !password) { //check that email or password are not blank
     return res.status(400).send("<h2>1. Please check the email or password! They cannot be empty.</h2>");
   }
-  const user_key = getUserByEmail(users, email);
-  if (!user_key) {
+  const user = getUserByEmail(users, email);
+  if (!user) {
     return res.status(403).send("<h2>Invalid request. Please register <a href='/register'>here</a>!</h2>");
   }
-  if (user_key) {
-    if (bcrypt.compareSync(password, users[user_key].password)) {
-      req.session.user_id = user_key;
+  if (user) {
+    console.log("user object", user)
+    console.log("password", user.password)
+    if (bcrypt.compareSync(password, user.password)) {
+      req.session.user_id = user.id;
       return res.redirect('/urls');
     }
   }
@@ -269,5 +271,3 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-//Driver code
-console.log(urlDatabase);
