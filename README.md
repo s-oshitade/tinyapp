@@ -13,10 +13,10 @@ This project was completed by [me](https://www.linkedin.com/in/seun-oshitade-530
 ### `User Login Page`
 !["User Login Page"](./public/images/login.png)
 
-`User-specific URL Dashboard`
+### `User-specific URL Dashboard`
 !["User-specific URL Dashboard"](./public/images/urls.png)
 
-`Long URL and short URL link`
+### `Long URL and short URL link`
 !["Long URL and short URL link"](./public/images/editURL.png)
 
 ## Dependencies
