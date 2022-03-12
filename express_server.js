@@ -232,7 +232,7 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 //Route handler for updating URLs
-app.post("/urls/:id", (req, res) => {
+app.put("/urls/:id", (req, res) => {
   const user_id = req.session.user_id;
   if (!user_id) {
     return res.status(403).send("<h1>Please login <a href='/login'>here</a> to access the requested page!</h1>");
