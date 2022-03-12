@@ -7,7 +7,7 @@
 This project was completed by [me](https://www.linkedin.com/in/seun-oshitade-53001120b/) as part of my learnings at Lighthouse Labs. TinyApp is a full stack web application built with Node and Express that allows users to shorten long URLs (à la [bit.ly](https://bitly.com/)). In-scope outcomes include working with cookies and sessions securely (using encrypted cookies), storing passwords securely (encryption vs hashing), permissions/user-authentication best practices, use of template engines (embedded javascript) to render web pages. Other concepts covered include: Creating RESTful web server endpoints, method overriding and analytics using knowledge of cookies.
 
 ## Final Product
-![](https://github.com/s-oshitade/tinyapp/blob/main/public/images/tinyApp-SO.gif?raw=true)
+![gif of screenshots of tinyApp](https://github.com/s-oshitade/tinyapp/blob/main/docs/tinyApp-SO.gif?raw=true)
 
 ## Dependencies
 
