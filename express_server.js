@@ -1,4 +1,5 @@
 const express = require('express');
+const methodOverride = require('method-override');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
@@ -21,6 +22,8 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000 
 }));
 app.use(express.static("public"));
+
+app.use(methodOverride('_method'));
 
 //Set ejs as the view engine
 app.set("view engine", "ejs");
@@ -248,7 +251,7 @@ app.post("/urls/:id", (req, res) => {
 });
 
 //Route handler for deleting URLs
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.delete("/urls/:shortURL/delete", (req, res) => {
   const user_id = req.session.user_id;
   if (!user_id) {
     return res.status(401).send("<h2>Please login <a href='/login'>here</a> to access the requested page!</h2>");
