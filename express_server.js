@@ -251,14 +251,14 @@ app.post("/urls/:id", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   const user_id = req.session.user_id;
   if (!user_id) {
-    return res.status(401).send("<h2>123Please login <a href='/login'>here</a> to access the requested page!</h2>");
+    return res.status(401).send("<h2>Please login <a href='/login'>here</a> to access the requested page!</h2>");
   }
   const user = users[user_id];
   const email = user.email;
   const password = user.password;
   const isLoggedIn = checkUserID(users, email, password);
   if (!isLoggedIn) {
-    return res.status(401).send("<h2>456Please login <a href='/login'>here</a> to access the requested page!</h2>");
+    return res.status(401).send("<h2>Please login <a href='/login'>here</a> to access the requested page!</h2>");
   }
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
