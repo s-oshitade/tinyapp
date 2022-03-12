@@ -17,7 +17,7 @@
 
     <div class="card-footer text-muted">
       <h2 class="card-title text-center">Edit</h2>
-      <form method="POST" action="/urls/<%= shortURL %>" class="text-center" >
+      <form method="POST" action="/urls/<%= shortURL %>?_method=PUT" class="text-center" >
         <label for="edit">New URL:</label>
         <input name="edit" id="edit" type="text" placeholder="https://">
         <button type="submit" class="btn btn-primary btn-sm">Submit</button>
