@@ -30,7 +30,7 @@
               <a href="/urls/<%= url %>" class="btn btn-outline-primary btn-sm">Edit</a>
             </td>
             <td>
-              <form method="POST" action="/urls/<%= url %>/delete" >
+              <form method="POST" action="/urls/<%= url %>/delete?_method=DELETE" >
                 <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
               </form>
             </td>
