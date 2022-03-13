@@ -39,7 +39,7 @@ This project was completed under significant time constraints. The following imp
 * Further refactoring and testing of helper functions
 
 ## Acknowledgement
-Credit to the community of intructors and mentors at Lighthouse Labs for providing necessary guidance in the course of this project.
+Credit to the community of instructors and mentors at Lighthouse Labs for providing necessary guidance in the course of this project.
 
 ## License
 This project is open source and available under the MIT license.
